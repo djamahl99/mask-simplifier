@@ -266,7 +266,7 @@ def main():
         T.ConvertImageDtype(torch.float)
     ])
 
-    batch_size = 32
+    batch_size = 16
     # load images
     dataset = OrderedBatchDataset('masks/instances_train2017', resize_t, 'key_pts/key_pts_instances_train2017.json', output_angle=True)
     # dataset = OrderedBatchDataset('masks/instances_val2017', resize_t, 'key_pts/key_pts_instances_val2017.json', output_angle=True)
@@ -282,14 +282,9 @@ def main():
                                         shuffle = True)
 
     epochs = 20
-    lr = 1e-4
+    lr = 1e-3
     amp = False
     device = torch.device('cuda')
-
-    # prev model
-    # model = torch.load("vertexdetector 0.314.pt").to(device)
-    # print(model)
-    # exit()
 
     model = PolygonPredictor().to(device)
 
@@ -361,6 +356,11 @@ def main():
 
                     scheduler.step(val_score)
                     writer.add_scalar("Learning Rate", optimizer.param_groups[0]['lr'], global_step)
+                    writer.add_scalar("Train/BCE - Epoch", running_loss/n, global_step)
+                    writer.add_scalar("Train/BCE + Dice: Position", running_pos/n, global_step)
+                    writer.add_scalar("Train/BCE: num vertices", running_len/n, global_step)
+                    writer.add_scalar("Train/MSE: Angle", running_angle/n, global_step)
+
                     writer.flush()
 
 
@@ -369,10 +369,7 @@ def main():
 
                 pbar.set_postfix(**{'loss(ave)': running_loss/n, 'loss(len)': running_len/n, 'loss(pos)': running_pos/n, 'loss(angle)': running_angle/n})
 
-                writer.add_scalar("Train/BCE - Epoch", running_loss/n, epoch)
-                writer.add_scalar("Train/BCE + Dice: Position", running_pos/n, epoch)
-                writer.add_scalar("Train/BCE: num vertices", running_len/n, epoch)
-                writer.add_scalar("Train/MSE: Angle", running_angle/n, epoch)
+
 
         save_epoch_images(epoch, in_imgs, pred_len, pred_pos, true_pos, true_len, pred_angle, true_angle)
         # print(f"EPOCH {epoch} Loss {running_loss/n:.8f}")

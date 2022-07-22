@@ -15,18 +15,50 @@ from helpers import angle_between
 
 
 class COCOPolygonDataset(Dataset):
-    def __init__(self, key_pts, output_angle=False):
-        self.key_pts = json.loads(open(key_pts).read())
+    def __init__(self, key_pts, output_angle=False, original_masks=None):
         self.out_transform = transforms.GaussianBlur(9, sigma=1)
-        self.idxs = list(self.key_pts.keys())
-        self.output_angle = output_angle
+        self.output_angle = output_angle 
+        self.instances = None
+
+        if original_masks is not None:
+            print("using original masks")
+            self.instances = json.loads(open(original_masks).read())
+            img_id_to_img = {img['id']: img for img in self.instances['images']}
+
+            print("img id to img", img_id_to_img)
+
+            instances_tmp = {}
+            new_shape = (224, 224)
+
+            for annot in self.instances['annotations']:
+                img = img_id_to_img[annot['image_id']]
+
+                w, h = img['width'], img['height']
+                n_w, n_h = (w / max(w,h)) * new_shape[0], (h / max(w,h)) * new_shape[1]
+                r_w, r_h = n_w / w, n_h / h
+
+                try:
+                    pts = np.array([[annot['segmentation'][0][2*i] * r_w, annot['segmentation'][0][2*i+1] * r_h] for i in range(len(annot['segmentation'][0]) // 2)])
+                except Exception as e:
+                    continue
+
+                instances_tmp[annot['id']] = np.int32([pts])
+                # print("points shape", instances_tmp[annot['id']].shape)
+
+
+            self.key_pts = instances_tmp
+            self.idxs = list(self.instances.keys())
+
+        else: # use simplified version
+            self.key_pts = json.loads(open(key_pts).read()) 
+            self.idxs = list(self.key_pts.keys())
 
         self.input_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.ConvertImageDtype(torch.float)
         ])
 
-        self.buffer = 10 # 10 px
+        self.buffer = 10 # px buffer from border
 
     def __len__(self):
         return len(self.idxs) # should be the same
@@ -74,8 +106,6 @@ class COCOPolygonDataset(Dataset):
 
         length_oh = F.one_hot(torch.tensor([length - 1]), MAX_SEQ_LEN) # starts at zero
         key_pts_list = np.array(key_pts_list).reshape(length, 2)
-
-
 
         # ANGLEEE
         if self.output_angle:

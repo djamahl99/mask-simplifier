@@ -2,14 +2,18 @@
 
 ![Demo Image 1](docs/Figure_2.png)
 
-Mask Simplifier aims to provide a way for producing a simplified polygon from an output mask from any instance or panoptic segmentation model.
+Mask Simplifier aims to provide a way for producing a simplified polygon from an output mask from an instance segmentation model.
+
+### Initial Model
 
 The model contains 5 layers of 3x3 convolutions to extract features and an output layer to get the desired single channel out. The layers maintain the same image dimension with (1,1) padding and (1,1) stride. 
 
 After each layer the output from the previous layer is added after being passed through a 1x1 convolution to reduce the channels to 1 to hopefully allow gradients to flow to earlier layers.
 
-**Other models**: A UNet with ResNet18 feature extractor was also experimented with. It gave slightly better dice, and took up less memory when training, allowing for a larger batch size. 
-This model was modified with sigmoid activation and a 5x5 maxpooling and then unpooling for the output. 
+### UNet Model
+A UNet with ResNet18 feature extractor was also experimented with. It gave better Dice score, and took up less memory (as it doesn't maintain the dimensionality) when training, allowing for a larger batch size. 
+
+This model was modified with sigmoid activation and the same maxpooling -> maxunpooling as was done with the initial model.
 
 ### Vertex Detection
 
@@ -38,8 +42,8 @@ The number of vertices is scaled down to less than or equal to 50 using [Ramer-D
 
 During training, the polygons are resized if they are less than 50px wide or tall. The polygons are also centered by taking the difference between the mean of the vertices and moving it to the center of the image.
 
-<!-- ## Training
+## Some Predictions
 
-### Loss Functions
-
-Binary cross entropy is used for the vertex detection and number of vertices. -->
+![Demo Image 1](docs/Figure_4.png)
+![Demo Image 2](docs/Figure_1.png)
+![Demo Image 3](docs/Figure_3.png)

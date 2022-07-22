@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from generate_dataset import MAX_SEQ_LEN
 
+from torchvision import models
+
 def convrelu(in_channels, out_channels, kernel, padding, bias=True):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, kernel, padding=padding, bias=bias),
@@ -113,12 +115,16 @@ class PolygonPredictor(nn.Module):
         return length, out
 
 class ResNetUNet(nn.Module):
-    def __init__(self, n_class):
+    def __init__(self, n_class, backbone='resnet18'):
         super().__init__()
 
-        self.base_model = models.resnet18(pretrained=True)
-        # self.base_model = models.resnet34(pretrained=True)
-        # self.base_model = models.resnet50(pretrained=True)
+        if backbone == 'resnet18':
+            self.base_model = models.resnet18(pretrained=True)
+        elif backbone == 'resnet34':
+            self.base_model = models.resnet34(pretrained=True)
+        else:
+            self.base_model = models.resnet50(pretrained=True)
+
         self.base_layers = list(self.base_model.children())
 
         self.layer0 = nn.Sequential(*self.base_layers[:3]) # size=(N, 64, x.H/2, x.W/2)
@@ -172,8 +178,8 @@ class ResNetUNet(nn.Module):
             nn.Sigmoid() # added as using BCE
         )
 
-        self.pool = nn.MaxPool2d(13, 2, return_indices=True)
-        self.unpool = nn.MaxUnpool2d(13, 2)
+        self.pool = nn.MaxPool2d(5, 2, return_indices=True)
+        self.unpool = nn.MaxUnpool2d(5, 2)
 
         self.rgb_conv = convrelu(1, 3, 3, 1)
 

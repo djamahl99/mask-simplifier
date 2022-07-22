@@ -124,9 +124,11 @@ def main():
     lr = 1e-4
     load_model = False
 
-    # load images ################################
-    dataset = COCOPolygonDataset('key_pts/key_pts_instances_train2017.json', output_angle=False)
-    # dataset = COCOPolygonDataset('key_pts/key_pts_instances_val2017.json', output_angle=False)
+    ####################################################################################
+    # load dataset #####################################################################
+    dataset = COCOPolygonDataset('key_pts/key_pts_instances_train2017.json')
+    # dataset = COCOPolygonDataset('key_pts/key_pts_instances_val2017.json', output_angle=False) 
+    # dataset = COCOPolygonDataset('key_pts/key_pts_instances_val2017.json', original_masks='annotations/instances_train2017.json')
     val_dataset = COCOPolygonDataset('key_pts/key_pts_instances_val2017.json')
 
     train_loader = torch.utils.data.DataLoader(dataset,
@@ -154,6 +156,8 @@ def main():
 
     model.train(True)
 
+    ####################################################################################
+    # optimizers and lr scheduling ######################################################
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     optimizer = torch.optim.RMSprop(model.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)

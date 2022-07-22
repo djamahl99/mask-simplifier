@@ -31,6 +31,10 @@ After this an MLP head with one hidden layer is used to output the one-hot encod
 
 Currently experimenting with predicting the angles at each pixel, to help influence the reconstruction of the polygon.
 
+### Regenerating shape from prediction
+
+Currently using **alphashape** pip library to regenerate the shapes, with alpha given by optimizealpha function.
+
 ## Dataset
 
 Polygons are extracted from instance segmentation labels from the [COCO Dataset](https://cocodataset.org/). 

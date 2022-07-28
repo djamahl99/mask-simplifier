@@ -209,7 +209,7 @@ def main():
                 global_step += 1
 
                 if global_step % 1000 == 0:
-                    save_epoch_images(epoch, in_imgs, pred_len, pred_pos, true_pos, true_len, pred_angle=None, true_angle=None)
+                    # save_epoch_images(epoch, in_imgs, pred_len, pred_pos, true_pos, true_len, pred_angle=None, true_angle=None)
                     torch.save(model, model_save_name)
 
                     val_score = evaluate(model, val_loader, device)
@@ -229,7 +229,7 @@ def main():
 
                 pbar.set_postfix(**{'loss(ave)': running_loss/n, 'loss(len)': running_len/n, 'loss(pos)': running_pos/n, 'loss(angle)': running_angle/n})
 
-        save_epoch_images(epoch, in_imgs, pred_len, pred_pos, true_pos, true_len, pred_angle=None, true_angle=None)
+        # save_epoch_images(epoch, in_imgs, pred_len, pred_pos, true_pos, true_len, pred_angle=None, true_angle=None)
         torch.save(model, model_save_name)
         writer.flush()
 

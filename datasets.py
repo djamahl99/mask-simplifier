@@ -68,44 +68,28 @@ class COCOPolygonDataset(Dataset):
 
         length = key_pts_list.shape[-2]
 
+        key_pts_list = key_pts_list.reshape(-1, 2)
+
         if True:
             # centering
-            mean = np.mean(key_pts_list, 1)[0]
-            key_pts_list[0] = key_pts_list[0] + (np.array([[111, 111]]) - mean)
-
-            # rescaling
-            rescale_range = 112
-            min_x, max_x = np.min(key_pts_list[:, :, 0]), np.max(key_pts_list[:, :, 0])
-            range_x = max_x - min_x
-            min_y, max_y = np.min(key_pts_list[:, :, 1]), np.max(key_pts_list[:, :, 1])
-            range_y = max_y - min_y
-
-            if min(range_x, range_y) == 0:
-                key_pts_list = np.array([[[100, 100], [100, 200], [200, 200], [200, 100], [100, 100]]])
-                length = 5
-            elif min(range_x, range_y) < 50:
-                r_mul = 200 / (max(range_x, range_y) + 1) # plus one to avoid zero division
-
-                key_pts_list[:, :, 0] = (r_mul * key_pts_list[:, :, 0].astype(np.float32)).astype(np.int8) 
-                key_pts_list[:, :, 1] = (r_mul * key_pts_list[:, :, 1].astype(np.float32)).astype(np.int8)
-
-                # centering
-                mean = np.mean(key_pts_list, 1)[0]
-                key_pts_list[0] = key_pts_list[0] + (np.array([[111, 111]]) - mean)
+            mean = np.mean(key_pts_list, 0)
+            key_pts_list = key_pts_list + (np.array([[224//2, 224//2]]) - mean).astype(int)
 
         in_img = np.zeros((224, 224))
         output_img = torch.zeros((1, 224, 224))
 
-        for i in range(key_pts_list.shape[1]):
-            key_pt = key_pts_list[0, i]
-            key_pts_list[0, i] = [np.clip(key_pt[0], self.buffer, 223 - self.buffer), np.clip(key_pt[1], self.buffer, 223 - self.buffer)]
-            key_pt = key_pts_list[0, i]
+        for i in range(key_pts_list.shape[0]):
+            key_pt = key_pts_list[i]
+            key_pts_list[i] = [np.clip(key_pt[0], self.buffer, 223 - self.buffer), np.clip(key_pt[1], self.buffer, 223 - self.buffer)]
+            key_pt = key_pts_list[i]
             output_img[0, key_pt[1], key_pt[0]] = 1
+
+        key_pts_list = key_pts_list.reshape(1, -1, 2)
 
         in_img = cv2.fillPoly(in_img, key_pts_list, color=(255,255,255))
 
         length_oh = F.one_hot(torch.tensor([length - 1]), MAX_SEQ_LEN) # starts at zero
-        key_pts_list = np.array(key_pts_list).reshape(length, 2)
+        key_pts_list = key_pts_list.reshape(length, 2)
 
         # ANGLEEE
         if self.output_angle:

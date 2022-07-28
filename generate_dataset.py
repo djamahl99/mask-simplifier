@@ -30,7 +30,8 @@ def simplify_pts(pts):
     return np.array([pts], dtype=np.int32)
 
 if __name__ == "__main__":
-    filename = "annotations/instances_train2017.json" # should be imput later
+    # filename = "annotations/instances_train2017.json" # should be imput later
+    filename = "annotations/instances_val2017.json" # should be imput later
 
 
     labels_txt = open("annotations/labels.txt").read()
@@ -81,26 +82,65 @@ if __name__ == "__main__":
         except Exception as e:
             continue
 
-        if len(pts) > MAX_SEQ_LEN:
-            pts = simplify_pts(pts)
+        # if len(pts) > MAX_SEQ_LEN:
+        #     pts = simplify_pts(pts)
 
+        #######################################################################################
+        # centering
+        mean = np.mean(pts, 0)
+        print(f"pts shape {pts.shape}")
+        pts = pts + (np.array([[224//2, 224//2]]) - mean)
+        # pts = pts - mean + 
+
+        # rescaling
+        # rescale_range = 112
+        # min_x, max_x = np.min(pts[:, 0]), np.max(pts[:, 0])
+        # range_x = max_x - min_x
+        # min_y, max_y = np.min(pts[:, 1]), np.max(pts[:, 1])
+        # range_y = max_y - min_y
+
+        # if min(range_x, range_y) == 0:
+        #     pts = np.array([[[100, 100], [100, 200], [200, 200], [200, 100], [100, 100]]])
+        #     length = 5
+        # elif min(range_x, range_y) < 50:
+        #     r_mul = 200 / (max(range_x, range_y) + 1) # plus one to avoid zero division
+
+        #     pts[:, 0] = (r_mul * pts[:, 0].astype(np.float32)).astype(np.int8) 
+        #     pts[:, 1] = (r_mul * pts[:, 1].astype(np.float32)).astype(np.int8)
+
+        #     # centering
+        #     mean = np.mean(pts, 0)
+        #     pts = pts + (np.array([[224//2, 224//2]]) - mean)
+        ######################################################################################
+
+        pts_simplified = simplify_pts(pts)
+        pts_simplified = np.int32([pts_simplified]) 
         pts = np.int32([pts])
         # print(pts)
 
         key_pts[annot['id']] = pts.tolist()
 
         # img_mat = np.zeros((img['height'], img['width']))
-        img_mat = np.zeros(new_shape)
-
+        img_mat = np.zeros((224,224,3))
         img_mat = cv2.fillPoly(img_mat, pts, color=(255,255,255))
 
+        for pt in pts[0]:
+            cv2.circle(img_mat, [pt[0], pt[1]], 1, (255, 0, 0))
 
-        cv2.imwrite(annot_path_name, img_mat)
+        img_mat_simple = np.zeros((224,224,3))
+        img_mat_simple = cv2.fillPoly(img_mat, pts_simplified, color=(255,255,255))
 
-        # plt.imshow(img_mat)
-        # plt.title(labels[annot['category_id'] - 1])
-        # plt.show()
+        plt.subplot(1, 2, 1)
+        plt.imshow(img_mat)
+        plt.title(f"mask of {labels[annot['category_id'] - 1]}, {pts_simplified.shape[-2]} vertices")
+        
+        plt.subplot(1, 2, 2)
+        plt.imshow(img_mat_simple)
+        plt.title(f"simplified {pts_simplified.shape[-2]} vertices")
+        plt.show()
 
-        if i % 100 == 0:
-            with open(json_pts_path, "w") as f:
-                f.write(json.dumps(key_pts))
+        # cv2.imwrite(annot_path_name, img_mat)
+
+        # if i % 100 == 0:
+        #     with open(json_pts_path, "w") as f:
+        #         f.write(json.dumps(key_pts))

@@ -4,6 +4,8 @@
 
 Mask Simplifier aims to provide a way for producing a simplified polygon from an output mask from an instance segmentation model.
 
+Researching ideas for [end-to-end segmentation with polygon predictions](docs/research.md).
+
 ### Initial Model
 
 The model contains 5 layers of 3x3 convolutions to extract features and an output layer to get the desired single channel out. The layers maintain the same image dimension with (1,1) padding and (1,1) stride. 
@@ -48,6 +50,7 @@ During training, the polygons are resized if they are less than 50px wide or tal
 
 ## Some Predictions
 
-![Demo Image 1](docs/Figure_4.png)
-![Demo Image 2](docs/Figure_1.png)
-![Demo Image 3](docs/Figure_3.png)
+![Demo Image 1](docs/Figure_5.png)
+![Demo Image 2](docs/Figure_4.png)
+![Demo Image 3](docs/Figure_1.png)
+![Demo Image 4](docs/square.png)

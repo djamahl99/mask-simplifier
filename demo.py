@@ -75,15 +75,15 @@ def regenerate_polygon(true_mask, nodes_list, node_coords, pred_pos):
     return draw_shapely(hull)
 
 def main():
-    device = torch.device("cpu")
+    device = torch.device("cuda")
 
     # model = torch.load("PolygonPredictor.pt").to(device)
-    model = torch.load("ResNetUNet5x5.pt").to(device)
+    model = torch.load("ResNetUNet.pt").to(device)
 
     val_dataset = COCOPolygonDataset('key_pts/key_pts_instances_val2017.json')
 
     val_loader = torch.utils.data.DataLoader(val_dataset,
-                                        batch_size = 16,
+                                        batch_size = 2,
                                         num_workers = 0,
                                         shuffle = True)
 

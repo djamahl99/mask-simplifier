@@ -2,6 +2,11 @@
 
 ## Papers to read
 
+### Instance Segmentation with Transformers
+-  Instance Segmentation Transformer  [https://arxiv.org/abs/2105.00637](arxiv:2105:00637)
+-  Feature Pyramid Networks for Object Detection [https://arxiv.org/abs/1612.03144](arxiv:1612.03144)
+-  
+
 ### Polygon Instance Segmentation
 - PolyTransform [arXiv:1912.02801](https://arxiv.org/abs/1912.02801)
   
@@ -22,8 +27,9 @@
 - PolyTransform Paper [arXiv:1912.02801](https://arxiv.org/abs/1912.02801)
     - achieves SOTA on CityScapes, predicting polygon rather than mask
     - relies on an instance segmentation network to initialize the polygons, then refines them based on image features
+      - utilizes RCNN for object boundaries to initialize polygons
       - network acts as a refinement process on the predictions given by another instance segmentation network
-    - Would be interesting to see if Instance Segmentation Transformer  [https://arxiv.org/abs/2105.00637](arxiv:2105:00637) could be combined with this to produce a single model for polygon instance segmentation prediction
+    - **Would be interesting to see if Instance Segmentation Transformer  [https://arxiv.org/abs/2105.00637](arxiv:2105:00637) could be combined with this to produce a single model for polygon instance segmentation prediction**
 - using a transformer to predict each subsequent vertex might be ill-suited as vertices should communicate a movement as described in PolyTransform
   - moving one vertex effects the two edges it is connected to, effecting the vertices next to it 
 
